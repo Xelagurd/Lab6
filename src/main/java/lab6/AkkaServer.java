@@ -69,4 +69,41 @@ public class AkkaServer {
                 .thenCompose(ServerBinding::unbind)
                 .thenAccept(unbound -> system.terminate());
     }
+
+    private Route route() {
+        return concat(
+                get(
+                        () -> parameter(URL, url ->
+                                parameter(COUNT, count -> {
+                                            int parsedCount = Integer.parseInt(count);
+                                            if (parsedCount != 0) {
+                                                CompletionStage<HttpResponse> response = Patterns
+                                                        .ask(
+                                                                storageActor,
+                                                                new GetRandomPort(Integer.toString(port)),
+                                                                java.time.Duration.ofMillis(TIMEOUT_MILLIS)
+                                                        )
+                                                        .thenCompose(
+                                                                req -> fetchToServer(
+                                                                        (int) req,
+                                                                        url,
+                                                                        parsedCount
+                                                                )
+                                                        );
+                                                return completeWithFuture(response);
+                                            }
+                                            try {
+                                                return complete(fetch(url).toCompletableFuture().get());
+                                            } catch (InterruptedException | ExecutionException e) {
+                                                e.printStackTrace();
+                                                return complete(URL_ERROR_MESSAGE);
+                                            }
+
+                                        }
+                                )
+                        )
+                )
+        );
+
+    }
 }
