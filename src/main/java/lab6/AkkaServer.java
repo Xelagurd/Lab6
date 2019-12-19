@@ -35,6 +35,8 @@ public class AkkaServer extends AllDirectives {
     static final String ZOOKEEPER_SERVER_DIR = "/servers/";
     private static final String URL = "url";
     private static final String COUNT = "count";
+    private static final String URL_ERROR = "Cant connect to url";
+    private static final String NOT_FOUND = "404";
     private static final int TIMEOUT = 5000;
 
     public static void main(String[] args) throws Exception {
@@ -86,12 +88,12 @@ public class AkkaServer extends AllDirectives {
                                                 CompletionStage<HttpResponse> response = Patterns
                                                         .ask(
                                                                 storageActor,
-                                                                new GetRandomPort(Integer.toString(port)),
-                                                                java.time.Duration.ofMillis(TIMEOUT_MILLIS)
+                                                                new GetRandomServerMessage(Integer.toString(port)),
+                                                                java.time.Duration.ofMillis(TIMEOUT)
                                                         )
                                                         .thenCompose(
-                                                                req -> fetchToServer(
-                                                                        (int) req,
+                                                                port -> fetchToServer(
+                                                                        (int) port,
                                                                         url,
                                                                         countInt
                                                                 )
@@ -99,7 +101,12 @@ public class AkkaServer extends AllDirectives {
                                                 return completeWithFuture(response);
                                             }
 
-
+                                            try {
+                                                return complete(fetch(url).toCompletableFuture().get());
+                                            } catch (InterruptedException | ExecutionException e) {
+                                                e.printStackTrace();
+                                                return complete(URL_ERROR);
+                                            }
                                         }
                                 )
                         )
