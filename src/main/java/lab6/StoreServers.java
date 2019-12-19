@@ -6,7 +6,7 @@ public class StoreServers {
     private ArrayList<String> servers;
 
     public StoreServers(ArrayList<String> servers) {
-        this.servers =servers;
+        this.servers = servers;
     }
 
     public ArrayList<String> getServers() {
