@@ -19,6 +19,7 @@ import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.ZooKeeper;
 
 import java.util.Scanner;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 
@@ -26,6 +27,7 @@ public class AkkaServer extends AllDirectives {
     private static int port;
     private static ActorRef storageActor;
     private static ZooKeeper zoo;
+    private static Http http;
 
     private static final String ROUTES = "routes";
     private static final String LOCALHOST = "localhost";
@@ -62,9 +64,10 @@ public class AkkaServer extends AllDirectives {
 
         zoo.getChildren(ZOOKEEPER_SERVERS_DIR, new CustomWatcher(zoo, storageActor));
 
+        http = Http.get(system);
         final ActorMaterializer materializer = ActorMaterializer.create(system);
         final Flow<HttpRequest, HttpResponse, NotUsed> routeFlow = akkaServer.route().flow(system, materializer);
-        final CompletionStage<ServerBinding> binding = Http.get(system).bindAndHandle(
+        final CompletionStage<ServerBinding> binding = http.bindAndHandle(
                 routeFlow,
                 ConnectHttp.toHost(LOCALHOST, port),
                 materializer
@@ -113,5 +116,21 @@ public class AkkaServer extends AllDirectives {
                 )
         );
 
+    }
+
+    CompletionStage<HttpResponse> fetchToServer(int port, String url, int count) {
+        try {
+            return http.singleRequest(HttpRequest.create("http://localhost:" + port + "/?url=" + url + "&count=" + (count - 1)));
+        } catch (Exception e) {
+            return CompletableFuture.completedFuture(HttpResponse.create().withEntity(NOT_FOUND));
+        }
+    }
+
+    CompletionStage<HttpResponse> fetch(String url) {
+        try {
+            return http.singleRequest(HttpRequest.create(url));
+        } catch (Exception e) {
+            return CompletableFuture.completedFuture(HttpResponse.create().withEntity(NOT_FOUND));
+        }
     }
 }
