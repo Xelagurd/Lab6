@@ -16,8 +16,7 @@ public class CacheActor extends AbstractActor {
                 .match(StoreServers.class, m -> {
                     servers = m.getServers();
                 })
-                .match(GetRandomServer.class, m -> {
-                    ser
+                .match(GetRandomServer.class, m ->
                     servers.remove(m.getPort());
                     Random rand = new Random();
                     int len = servers.size();
