@@ -46,7 +46,7 @@ public class AkkaServer {
                 new CustomWatcher(zoo, storageActor)
         );
         zoo.create(
-                ZOOKEEPER_SERVER_DIR + Integer.toString(port),
+                ZOOKEEPER_SERVER_DIR + port,
                 Integer.toString(port).getBytes(),
                 ZooDefs.Ids.OPEN_ACL_UNSAFE,
                 CreateMode.EPHEMERAL
