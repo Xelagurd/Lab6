@@ -4,12 +4,12 @@ import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.japi.pf.ReceiveBuilder;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 public class CacheActor extends AbstractActor {
-    private static final int NO_ANSWER_MSG = -1;
-    private Map<String, String> storage = new HashMap<>();
+    private ArrayList<String> servers = new HashMap<>();
 
     @Override
     public Receive createReceive() {
