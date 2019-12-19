@@ -32,7 +32,7 @@ public class AkkaServer extends AllDirectives {
     private static final String ROUTES = "routes";
     private static final String LOCALHOST = "localhost";
     private static final String SERVER_ONLINE = "Server online on localhost:";
-    private static final String ZOOKEEPER_HOST = "127.0.0.1:5000";
+    private static final String ZOOKEEPER_HOST = "127.0.0.1:2181";
     static final String ZOOKEEPER_SERVERS_DIR = "/servers";
     static final String ZOOKEEPER_SERVER_DIR = "/servers/";
     private static final String URL = "url";
