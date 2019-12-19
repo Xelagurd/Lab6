@@ -9,6 +9,9 @@ import akka.http.javadsl.Http;
 import akka.http.javadsl.ServerBinding;
 import akka.http.javadsl.model.HttpRequest;
 import akka.http.javadsl.model.HttpResponse;
+import akka.http.javadsl.server.AllDirectives;
+import akka.http.javadsl.server.Route;
+import akka.pattern.Patterns;
 import akka.stream.ActorMaterializer;
 import akka.stream.javadsl.Flow;
 import org.apache.zookeeper.CreateMode;
@@ -17,8 +20,9 @@ import org.apache.zookeeper.ZooKeeper;
 
 import java.util.Scanner;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
 
-public class AkkaServer {
+public class AkkaServer extends AllDirectives {
     private static int port;
     private static ActorRef storageActor;
     private static ZooKeeper zoo;
@@ -29,6 +33,8 @@ public class AkkaServer {
     private static final String ZOOKEEPER_HOST = "127.0.0.1:5000";
     static final String ZOOKEEPER_SERVERS_DIR = "/servers";
     static final String ZOOKEEPER_SERVER_DIR = "/servers/";
+    private static final String URL = "url";
+    private static final String COUNT = "count";
     private static final int TIMEOUT = 5000;
 
     public static void main(String[] args) throws Exception {
@@ -75,29 +81,11 @@ public class AkkaServer {
                 get(
                         () -> parameter(URL, url ->
                                 parameter(COUNT, count -> {
-                                            int parsedCount = Integer.parseInt(count);
-                                            if (parsedCount != 0) {
-                                                CompletionStage<HttpResponse> response = Patterns
-                                                        .ask(
-                                                                storageActor,
-                                                                new GetRandomPort(Integer.toString(port)),
-                                                                java.time.Duration.ofMillis(TIMEOUT_MILLIS)
-                                                        )
-                                                        .thenCompose(
-                                                                req -> fetchToServer(
-                                                                        (int) req,
-                                                                        url,
-                                                                        parsedCount
-                                                                )
-                                                        );
-                                                return completeWithFuture(response);
+                                            int countInt = Integer.parseInt(count);
+                                            if (countInt != 0) {
+
                                             }
-                                            try {
-                                                return complete(fetch(url).toCompletableFuture().get());
-                                            } catch (InterruptedException | ExecutionException e) {
-                                                e.printStackTrace();
-                                                return complete(URL_ERROR_MESSAGE);
-                                            }
+
 
                                         }
                                 )
