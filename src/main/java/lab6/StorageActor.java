@@ -13,10 +13,10 @@ public class StorageActor extends AbstractActor {
     @Override
     public Receive createReceive() {
         return ReceiveBuilder.create()
-                .match(StoreServers.class, m -> {
+                .match(StoreServersMessage.class, m -> {
                     servers = m.getServers();
                 })
-                .match(GetRandomServer.class, m -> {
+                .match(GetRandomServerMessage.class, m -> {
                     ArrayList<String> serversCopy = new ArrayList<>(servers);
                     serversCopy.remove(m.getPort());
                     Random rand = new Random();

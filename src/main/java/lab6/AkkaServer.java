@@ -11,11 +11,12 @@ import akka.http.javadsl.model.HttpRequest;
 import akka.http.javadsl.model.HttpResponse;
 import akka.stream.ActorMaterializer;
 import akka.stream.javadsl.Flow;
-import org.apache.zookeeper.*;
+import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.ZooDefs;
+import org.apache.zookeeper.ZooKeeper;
 
-import java.io.IOException;
 import java.util.Scanner;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletionStage;
 
 public class AkkaServer {
     private static int port;
@@ -26,8 +27,8 @@ public class AkkaServer {
     private static final String LOCALHOST = "localhost";
     private static final String SERVER_ONLINE = "Server online on localhost:";
     private static final String ZOOKEEPER_HOST = "127.0.0.1:5000";
-    private static final String ZOOKEEPER_SERVERS_DIR = "/servers";
-    private static final String ZOOKEEPER_SERVER_DIR = "/servers/";
+    static final String ZOOKEEPER_SERVERS_DIR = "/servers";
+    static final String ZOOKEEPER_SERVER_DIR = "/servers/";
     private static final int TIMEOUT = 5000;
 
     public static void main(String[] args) throws Exception {
@@ -42,7 +43,7 @@ public class AkkaServer {
         zoo = new ZooKeeper(
                 ZOOKEEPER_HOST,
                 TIMEOUT,
-                new CustomWatcher(zoo)
+                new CustomWatcher(zoo, storageActor)
         );
         zoo.create(
                 ZOOKEEPER_SERVER_DIR + Integer.toString(port),
@@ -51,7 +52,7 @@ public class AkkaServer {
                 CreateMode.EPHEMERAL
         );
 
-        zoo.getChildren(ZOOKEEPER_SERVERS_DIR, new CustomWatcher());
+        zoo.getChildren(ZOOKEEPER_SERVERS_DIR, new CustomWatcher(zoo, storageActor));
 
         final ActorMaterializer materializer = ActorMaterializer.create(system);
         final Flow<HttpRequest, HttpResponse, NotUsed> routeFlow = akkaServer.route().flow(system, materializer);

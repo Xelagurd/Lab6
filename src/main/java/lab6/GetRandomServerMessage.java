@@ -1,9 +1,9 @@
 package lab6;
 
-public class GetRandomServer {
+public class GetRandomServerMessage {
     private String port;
 
-    public GetRandomServer(String port) {
+    public GetRandomServerMessage(String port) {
         this.port = port;
     }
 
