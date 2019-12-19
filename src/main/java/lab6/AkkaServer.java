@@ -42,7 +42,7 @@ public class AkkaServer {
         zoo = new ZooKeeper(
                 ZOOKEEPER_HOST,
                 TIMEOUT,
-                new CustomWatcher()
+                new CustomWatcher(zoo)
         );
         zoo.create(
                 ZOOKEEPER_SERVER_DIR + Integer.toString(port),
