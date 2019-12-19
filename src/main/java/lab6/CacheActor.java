@@ -16,11 +16,12 @@ public class CacheActor extends AbstractActor {
                 .match(StoreServers.class, m -> {
                     servers = m.getServers();
                 })
-                .match(GetRandomServer.class, m ->
-                    servers.remove(m.getPort());
+                .match(GetRandomServer.class, m -> {
+                    ArrayList<String> serversCopy = new ArrayList<>(servers);
+                    serversCopy.remove(m.getPort());
                     Random rand = new Random();
-                    int len = servers.size();
-                    getSender().tell(Integer.parseInt(servers.get(rand.nextInt(len))), ActorRef.noSender());
+                    int len = serversCopy.size();
+                    getSender().tell(Integer.parseInt(serversCopy.get(rand.nextInt(len))), ActorRef.noSender());
 
                 }).build();
     }
