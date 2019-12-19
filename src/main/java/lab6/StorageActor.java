@@ -7,7 +7,7 @@ import akka.japi.pf.ReceiveBuilder;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class CacheActor extends AbstractActor {
+public class StorageActor extends AbstractActor {
     private ArrayList<String> servers = new ArrayList<>();
 
     @Override
