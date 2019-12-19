@@ -7,6 +7,7 @@ import akka.japi.pf.ReceiveBuilder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 public class CacheActor extends AbstractActor {
     private ArrayList<String> servers = new ArrayList<>();
@@ -17,8 +18,10 @@ public class CacheActor extends AbstractActor {
                 .match(StoreServers.class, m -> {
                     servers = m.getServers();
                 })
-                .match(GetRandomServer.class, req -> {
-                    System.out.println("Message for site: " + req.getSite() + " with count " + req.getRequestCount() + " received");
+                .match(GetRandomServer.class, m -> {
+                    servers.remove(m.getPort());
+                    Random rand = new Random();
+                    
                     if (storage.containsKey(req.getSite() + req.getRequestCount())) {
                         sender().tell(new Integer(storage.get(req.getSite() + req.getRequestCount())), ActorRef.noSender());
                     } else {
