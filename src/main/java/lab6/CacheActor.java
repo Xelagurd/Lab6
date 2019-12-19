@@ -9,16 +9,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CacheActor extends AbstractActor {
-    private ArrayList<String> servers = new HashMap<>();
+    private ArrayList<String> servers = new ArrayList<>();
 
     @Override
     public Receive createReceive() {
         return ReceiveBuilder.create()
                 .match(StoreServers.class, m -> {
-                    if (!storage.containsKey(m.getSite() + m.getRequestCount())) {
-                        storage.put(m.getSite() + m.getRequestCount(), m.getResult());
-                        System.out.println("Info for site: " + m.getSite() + " with count " + m.getRequestCount() + " added");
-                    }
+                    servers = m.getServers();
                 })
                 .match(GetRandomServer.class, req -> {
                     System.out.println("Message for site: " + req.getSite() + " with count " + req.getRequestCount() + " received");
