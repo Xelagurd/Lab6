@@ -83,7 +83,20 @@ public class AkkaServer extends AllDirectives {
                                 parameter(COUNT, count -> {
                                             int countInt = Integer.parseInt(count);
                                             if (countInt != 0) {
-
+                                                CompletionStage<HttpResponse> response = Patterns
+                                                        .ask(
+                                                                storageActor,
+                                                                new GetRandomPort(Integer.toString(port)),
+                                                                java.time.Duration.ofMillis(TIMEOUT_MILLIS)
+                                                        )
+                                                        .thenCompose(
+                                                                req -> fetchToServer(
+                                                                        (int) req,
+                                                                        url,
+                                                                        countInt
+                                                                )
+                                                        );
+                                                return completeWithFuture(response);
                                             }
 
 
