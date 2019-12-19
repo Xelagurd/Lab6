@@ -1,19 +1,13 @@
 package lab6;
 
 public class GetRandomServer {
-    private String site;
-    private Integer requestCount;
+    private String port;
 
-    public GetRandomServer(String site, int requestCount) {
-        this.site = site;
-        this.requestCount = requestCount;
+    public GetRandomServer(String port) {
+        this.port = port;
     }
 
-    public int getRequestCount() {
-        return requestCount;
-    }
-
-    public String getSite() {
-        return site;
+    public String getPort() {
+        return this.port;
     }
 }
