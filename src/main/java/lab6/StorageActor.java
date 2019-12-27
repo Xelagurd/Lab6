@@ -22,7 +22,6 @@ public class StorageActor extends AbstractActor {
                     Random rand = new Random();
                     int len = serversCopy.size();
                     getSender().tell(Integer.parseInt(serversCopy.get(rand.nextInt(len))), ActorRef.noSender());
-
                 }).build();
     }
 }

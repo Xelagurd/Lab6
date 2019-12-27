@@ -12,3 +12,7 @@
     </annotationProcessing>
   </component>
 </project>
+      <module name="Lab6" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+</project>

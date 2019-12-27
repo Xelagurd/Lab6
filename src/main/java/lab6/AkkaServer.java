@@ -14,10 +14,10 @@ import akka.http.javadsl.server.Route;
 import akka.pattern.Patterns;
 import akka.stream.ActorMaterializer;
 import akka.stream.javadsl.Flow;
-import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.ZooDefs;
-import org.apache.zookeeper.ZooKeeper;
+import org.apache.zookeeper.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -53,8 +53,16 @@ public class AkkaServer extends AllDirectives {
         zoo = new ZooKeeper(
                 ZOOKEEPER_HOST,
                 TIMEOUT,
-                new CustomWatcher(zoo, storageActor)
+                new CustomWatcher()
         );
+        /*
+        zoo.create(
+                ZOOKEEPER_SERVERS_DIR,
+                Integer.toString(0).getBytes(),
+                ZooDefs.Ids.OPEN_ACL_UNSAFE,
+                CreateMode.PERSISTENT
+        );
+        */
         zoo.create(
                 ZOOKEEPER_SERVER_DIR + port,
                 Integer.toString(port).getBytes(),
@@ -62,7 +70,7 @@ public class AkkaServer extends AllDirectives {
                 CreateMode.EPHEMERAL
         );
 
-        zoo.getChildren(ZOOKEEPER_SERVERS_DIR, new CustomWatcher(zoo, storageActor));
+        zoo.getChildren(ZOOKEEPER_SERVERS_DIR, new CustomWatcher());
 
         http = Http.get(system);
         final ActorMaterializer materializer = ActorMaterializer.create(system);
@@ -79,6 +87,32 @@ public class AkkaServer extends AllDirectives {
         binding
                 .thenCompose(ServerBinding::unbind)
                 .thenAccept(unbound -> system.terminate());
+    }
+
+    public static class CustomWatcher implements Watcher {
+        @Override
+        public void process(WatchedEvent event) {
+            List<String> servers = new ArrayList<>();
+            try {
+                servers = zoo.getChildren(ZOOKEEPER_SERVERS_DIR, this);
+            } catch (KeeperException | InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            ArrayList<String> serversData = new ArrayList<>();
+
+            for (String server : servers) {
+                byte[] data = new byte[0];
+                try {
+                    data = zoo.getData(ZOOKEEPER_SERVER_DIR + server, false, null);
+                } catch (KeeperException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+                serversData.add(new String(data));
+            }
+
+            storageActor.tell(new StoreServersMessage(serversData), ActorRef.noSender());
+        }
     }
 
     private Route route() {
